@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, Settings
 
 from .deploy import DeploymentConfig
 from .feature import FeatureConfig
+from .packaging import PackagingInfo
 from .middleware import MiddlewareConfig
 
 logger = logging.getLogger(__name__)
@@ -11,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 class DifyConfig(
     DeploymentConfig,
+    PackagingInfo,
     FeatureConfig,
     # Middleware configs
     MiddlewareConfig,

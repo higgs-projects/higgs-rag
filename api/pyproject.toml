@@ -1,5 +1,5 @@
 [project]
-name = "aip-rag"
+name = "higgs-rag"
 version = "0.1.0"
 description = "RAG based on Dify Milvus for Dify external Datasets"
 readme = "README.md"

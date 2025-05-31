@@ -10,7 +10,7 @@ from core.rag.entities.metadata_entities import Condition
 from core.rag.models.document import Document
 from extensions.ext_database import db
 from models.account import Account
-from models.dataset import Dataset
+from models.dataset import Dataset, Document as DatabaseDocument
 
 
 class HitTestingService:
@@ -30,7 +30,8 @@ class HitTestingService:
             query=query,
             top_k=retrieval_setting.get("top_k", 2),
             score_threshold=retrieval_setting.get("score_threshold", 0.0),
-            document_ids_filter=cls.get_document_id_filter(dataset.id, metadata_condition),
+            document_ids_filter=cls.get_document_id_filter(
+                dataset.id, metadata_condition),
         )
 
         end = time.perf_counter()
@@ -45,34 +46,35 @@ class HitTestingService:
         if records:
             for record in records:
                 segment = record.segment
-                dataset = db.session.query(Dataset).filter_by(id=segment.dataset_id).first()  # type: ignore
-                document = (
-                    db.session.query(Document)
+                dataset = db.session.query(Dataset).filter_by(
+                    id=segment.dataset_id).first()  # type: ignore
+                database_document = (
+                    db.session.query(DatabaseDocument)
                     .filter(
-                        Document.id == segment.document_id,
-                        Document.enabled == True,
-                        Document.archived == False,
+                        DatabaseDocument.id == segment.document_id,
+                        DatabaseDocument.enabled == True,
+                        DatabaseDocument.archived == False,
                     )
                     .first()
                 )
-                if dataset and document:
+                if dataset and database_document:
                     source = {
                         "metadata": {
                             "_source": "knowledge",
                             "dataset_id": dataset.id,
                             "dataset_name": dataset.name,
-                            "document_id": document.id,
-                            "document_name": document.name,
-                            "data_source_type": document.data_source_type,
+                            "document_id": database_document.id,
+                            "document_name": database_document.name,
+                            "data_source_type": database_document.data_source_type,
                             "segment_id": segment.id,
                             "retriever_from": "external",
                             "segment_hit_count": segment.hit_count,
                             "segment_word_count": segment.word_count,
                             "segment_position": segment.position,
                             "segment_index_node_hash": segment.index_node_hash,
-                            "doc_metadata": document.doc_metadata,
+                            "doc_metadata": database_document.doc_metadata,
                         },
-                        "title": document.name,
+                        "title": database_document.name,
                         "score": record.score or 0.0,
                     }
                     if segment.answer:
@@ -83,7 +85,8 @@ class HitTestingService:
         if retrieval_resource_list:
             retrieval_resource_list = sorted(
                 retrieval_resource_list,
-                key=lambda x: x["score"] if x.get("score") is not None else 0.0,
+                key=lambda x: x["score"] if x.get(
+                    "score") is not None else 0.0,
                 reverse=True,
             )
             for position, item in enumerate(retrieval_resource_list, start=1):
@@ -168,26 +171,43 @@ class HitTestingService:
                 )
             case "=" | "is":
                 if isinstance(value, str):
-                    filters.append(Document.doc_metadata[metadata_name] == f'"{value}"')
+                    filters.append(
+                        Document.doc_metadata[metadata_name] == f'"{value}"')
                 else:
-                    filters.append(sqlalchemy_cast(Document.doc_metadata[metadata_name].astext, Float) == value)
+                    filters.append(sqlalchemy_cast(
+                        Document.doc_metadata[metadata_name].astext, Float) == value)
             case "is not" | "≠":
                 if isinstance(value, str):
-                    filters.append(Document.doc_metadata[metadata_name] != f'"{value}"')
+                    filters.append(
+                        Document.doc_metadata[metadata_name] != f'"{value}"')
                 else:
-                    filters.append(sqlalchemy_cast(Document.doc_metadata[metadata_name].astext, Float) != value)
+                    filters.append(sqlalchemy_cast(
+                        Document.doc_metadata[metadata_name].astext, Float) != value)
             case "empty":
                 filters.append(Document.doc_metadata[metadata_name].is_(None))
             case "not empty":
-                filters.append(Document.doc_metadata[metadata_name].isnot(None))
+                filters.append(
+                    Document.doc_metadata[metadata_name].isnot(None))
             case "before" | "<":
-                filters.append(sqlalchemy_cast(Document.doc_metadata[metadata_name].astext, Float) < value)
+                filters.append(sqlalchemy_cast(
+                    Document.doc_metadata[metadata_name].astext, Float) < value)
             case "after" | ">":
-                filters.append(sqlalchemy_cast(Document.doc_metadata[metadata_name].astext, Float) > value)
+                filters.append(sqlalchemy_cast(
+                    Document.doc_metadata[metadata_name].astext, Float) > value)
             case "≤" | "<=":
-                filters.append(sqlalchemy_cast(Document.doc_metadata[metadata_name].astext, Float) <= value)
+                filters.append(sqlalchemy_cast(
+                    Document.doc_metadata[metadata_name].astext, Float) <= value)
             case "≥" | ">=":
-                filters.append(sqlalchemy_cast(Document.doc_metadata[metadata_name].astext, Float) >= value)
+                filters.append(sqlalchemy_cast(
+                    Document.doc_metadata[metadata_name].astext, Float) >= value)
             case _:
                 pass
         return filters
+
+    @classmethod
+    def hit_testing_args_check(cls, args):
+        query = args["query"]
+
+        if not query or len(query) > 500:
+            raise ValueError(
+                "Query is required and cannot exceed 500 characters")

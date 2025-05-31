@@ -4,7 +4,7 @@ from controllers.service_api.wraps import DatasetApiResource
 
 
 class HitTestingApi(DatasetApiResource, DatasetsHitTestingBase):
-    def post(self):
+    def post(self, tenant_id):
         args = self.parse_args()
         self.hit_testing_args_check(args)
 
@@ -14,4 +14,4 @@ class HitTestingApi(DatasetApiResource, DatasetsHitTestingBase):
         return self.perform_hit_testing(dataset, args)
 
 
-api.add_resource(HitTestingApi, "/datasets/retrieve")
+api.add_resource(HitTestingApi, "/datasets/retrieval")

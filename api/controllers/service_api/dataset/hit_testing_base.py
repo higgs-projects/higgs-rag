@@ -61,7 +61,7 @@ class DatasetsHitTestingBase:
                 retrieval_setting=args["retrieval_setting"],
                 metadata_condition=args["metadata_condition"],
             )
-            return {"records": marshal(response["records"])}
+            return {"records": response}
         except IndexNotInitializedError:
             raise DatasetNotInitializedError()
         except ProviderTokenNotInitError as ex:
