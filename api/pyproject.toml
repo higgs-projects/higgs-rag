@@ -24,6 +24,7 @@ dependencies = [
     "psycopg2-binary~=2.9.6",
     "redis[hiredis]~=6.1.0",
     "sqlalchemy~=2.0.29",
+    "tiktoken~=0.9.0",
 ]
 
 # Before adding new dependency, consider place it in
@@ -33,7 +34,7 @@ dependencies = [
 packages = []
 
 [tool.uv]
-default-groups = ["storage", "vdb"]
+default-groups = ["storage", "tools", "vdb"]
 package = false
 
 [dependency-groups]
@@ -110,6 +111,11 @@ storage = [
 ]
 
 ############################################################
+# [ Tools ] dependency group
+############################################################
+tools = ["cloudscraper~=1.2.71", "nltk~=3.9.1"]
+
+############################################################
 # [ VDB ] dependency group
 # Required by vector store clients
 ############################################################
@@ -136,3 +142,4 @@ vdb = [
     "weaviate-client~=3.24.0",
     "xinference-client~=1.2.2",
 ]
+
