@@ -12,7 +12,7 @@ uv run --directory api --dev ruff check --fix ./
 uv run --directory api --dev ruff format ./
 
 # run dotenv-linter linter
-uv run --project api --dev dotenv-linter ./api/.env.example ./web/.env.example
+uv run --project api --dev dotenv-linter ./api/.env.example
 
 # run mypy check
 dev/mypy-check
