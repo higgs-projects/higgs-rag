@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 from packaging import version
 from pydantic import BaseModel, model_validator
-from pymilvus import AnnSearchRequest, MilvusClient, RRFRanker  # type: ignore
+from pymilvus import AnnSearchRequest, MilvusClient, WeightedRanker  # type: ignore
 
 from configs import dify_config
 from core.rag.datasource.vdb.field import Field
@@ -87,7 +87,8 @@ class MilvusVector(BaseVector):
             milvus_version = self._client.get_server_version()
             return version.parse(milvus_version).base_version >= version.parse("2.5.0").base_version
         except Exception as e:
-            logger.warning(f"Failed to check Milvus version: {str(e)}. Disabling hybrid search.")
+            logger.warning(
+                f"Failed to check Milvus version: {str(e)}. Disabling hybrid search.")
             return False
 
     def get_type(self) -> str:
@@ -113,7 +114,8 @@ class MilvusVector(BaseVector):
             metadata["score"] = result["distance"]
 
             if result["distance"] > score_threshold:
-                doc = Document(page_content=result["entity"].get(output_fields[0], ""), metadata=metadata)
+                doc = Document(page_content=result["entity"].get(
+                    output_fields[0], ""), metadata=metadata)
                 docs.append(doc)
 
         return docs
@@ -149,7 +151,7 @@ class MilvusVector(BaseVector):
         results = self._client.hybrid_search(
             collection_name=self._collection_name,
             reqs=[sparse_request, dense_request],
-            ranker=RRFRanker(100),
+            ranker=WeightedRanker(0.3, 0.7),
             limit=kwargs.get("top_k", 4),
             output_fields=[Field.CONTENT_KEY.value, Field.METADATA_KEY.value],
         )
@@ -165,9 +167,11 @@ class MilvusVector(BaseVector):
         Initialize and return a Milvus client.
         """
         if config.token:
-            client = MilvusClient(uri=config.uri, token=config.token, db_name=config.database)
+            client = MilvusClient(
+                uri=config.uri, token=config.token, db_name=config.database)
         else:
-            client = MilvusClient(uri=config.uri, user=config.user, password=config.password, db_name=config.database)
+            client = MilvusClient(uri=config.uri, user=config.user,
+                                  password=config.password, db_name=config.database)
         return client
 
 
@@ -186,7 +190,8 @@ class MilvusVectorFactory(AbstractVectorFactory):
         else:
             dataset_id = dataset.id
             collection_name = Dataset.gen_collection_name_by_id(dataset_id)
-            dataset.index_struct = json.dumps(self.gen_index_struct_dict(VectorType.MILVUS, collection_name))
+            dataset.index_struct = json.dumps(
+                self.gen_index_struct_dict(VectorType.MILVUS, collection_name))
 
         return MilvusVector(
             collection_name=collection_name,
