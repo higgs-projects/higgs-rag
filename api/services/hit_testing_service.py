@@ -10,7 +10,8 @@ from core.rag.entities.metadata_entities import Condition
 from core.rag.models.document import Document
 from extensions.ext_database import db
 from models.account import Account
-from models.dataset import Dataset, Document as DatabaseDocument
+from models.dataset import Dataset
+from models.dataset import Document as DatabaseDocument
 
 
 class HitTestingService:

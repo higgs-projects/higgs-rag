@@ -1,8 +1,6 @@
 from datetime import datetime
-from enum import Enum, StrEnum
 
 import sqlalchemy as sa
-from flask_login import UserMixin
 from sqlalchemy import func
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -10,53 +8,6 @@ from .base import Base
 from .engine import db
 from .enums import CreatorUserRole
 from .types import StringUUID
-
-
-class AppMode(StrEnum):
-    COMPLETION = "completion"
-    WORKFLOW = "workflow"
-    CHAT = "chat"
-    ADVANCED_CHAT = "advanced-chat"
-    AGENT_CHAT = "agent-chat"
-    CHANNEL = "channel"
-
-    @classmethod
-    def value_of(cls, value: str) -> "AppMode":
-        """
-        Get value of given mode.
-
-        :param value: mode value
-        :return: mode
-        """
-        for mode in cls:
-            if mode.value == value:
-                return mode
-        raise ValueError(f"invalid mode value {value}")
-
-
-class IconType(Enum):
-    IMAGE = "image"
-    EMOJI = "emoji"
-
-
-class EndUser(Base, UserMixin):
-    __tablename__ = "end_users"
-    __table_args__ = (
-        db.PrimaryKeyConstraint("id", name="end_user_pkey"),
-        db.Index("end_user_session_id_idx", "session_id", "type"),
-        db.Index("end_user_tenant_session_id_idx", "tenant_id", "session_id", "type"),
-    )
-
-    id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
-    tenant_id: Mapped[str] = db.Column(StringUUID, nullable=False)
-    app_id = db.Column(StringUUID, nullable=True)
-    type = db.Column(db.String(255), nullable=False)
-    external_user_id = db.Column(db.String(255), nullable=True)
-    name = db.Column(db.String(255))
-    is_anonymous = db.Column(db.Boolean, nullable=False, server_default=db.text("true"))
-    session_id: Mapped[str] = mapped_column()
-    created_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
 
 
 class ApiToken(Base):
@@ -137,64 +88,3 @@ class UploadFile(Base):
         self.used_at = used_at
         self.hash = hash
         self.source_url = source_url
-
-
-class DatasetRetrieverResource(Base):
-    __tablename__ = "dataset_retriever_resources"
-    __table_args__ = (
-        db.PrimaryKeyConstraint("id", name="dataset_retriever_resource_pkey"),
-        db.Index("dataset_retriever_resource_message_id_idx", "message_id"),
-    )
-
-    id = db.Column(StringUUID, nullable=False, server_default=db.text("uuid_generate_v4()"))
-    message_id = db.Column(StringUUID, nullable=False)
-    position = db.Column(db.Integer, nullable=False)
-    dataset_id = db.Column(StringUUID, nullable=False)
-    dataset_name = db.Column(db.Text, nullable=False)
-    document_id = db.Column(StringUUID, nullable=True)
-    document_name = db.Column(db.Text, nullable=False)
-    data_source_type = db.Column(db.Text, nullable=True)
-    segment_id = db.Column(StringUUID, nullable=True)
-    score = db.Column(db.Float, nullable=True)
-    content = db.Column(db.Text, nullable=False)
-    hit_count = db.Column(db.Integer, nullable=True)
-    word_count = db.Column(db.Integer, nullable=True)
-    segment_position = db.Column(db.Integer, nullable=True)
-    index_node_hash = db.Column(db.Text, nullable=True)
-    retriever_from = db.Column(db.Text, nullable=False)
-    created_by = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.current_timestamp())
-
-
-class Tag(Base):
-    __tablename__ = "tags"
-    __table_args__ = (
-        db.PrimaryKeyConstraint("id", name="tag_pkey"),
-        db.Index("tag_type_idx", "type"),
-        db.Index("tag_name_idx", "name"),
-    )
-
-    TAG_TYPE_LIST = ["knowledge", "app"]
-
-    id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
-    tenant_id = db.Column(StringUUID, nullable=True)
-    type = db.Column(db.String(16), nullable=False)
-    name = db.Column(db.String(255), nullable=False)
-    created_by = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
-
-
-class TagBinding(Base):
-    __tablename__ = "tag_bindings"
-    __table_args__ = (
-        db.PrimaryKeyConstraint("id", name="tag_binding_pkey"),
-        db.Index("tag_bind_target_id_idx", "target_id"),
-        db.Index("tag_bind_tag_id_idx", "tag_id"),
-    )
-
-    id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
-    tenant_id = db.Column(StringUUID, nullable=True)
-    tag_id = db.Column(StringUUID, nullable=True)
-    target_id = db.Column(StringUUID, nullable=True)
-    created_by = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())

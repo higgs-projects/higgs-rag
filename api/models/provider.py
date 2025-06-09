@@ -115,22 +115,6 @@ class ProviderModel(Base):
     updated_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
 
 
-class TenantDefaultModel(Base):
-    __tablename__ = "tenant_default_models"
-    __table_args__ = (
-        db.PrimaryKeyConstraint("id", name="tenant_default_model_pkey"),
-        db.Index("tenant_default_model_tenant_id_provider_type_idx", "tenant_id", "provider_name", "model_type"),
-    )
-
-    id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
-    tenant_id = db.Column(StringUUID, nullable=False)
-    provider_name = db.Column(db.String(255), nullable=False)
-    model_name = db.Column(db.String(255), nullable=False)
-    model_type = db.Column(db.String(40), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
-
-
 class TenantPreferredModelProvider(Base):
     __tablename__ = "tenant_preferred_model_providers"
     __table_args__ = (
@@ -142,31 +126,6 @@ class TenantPreferredModelProvider(Base):
     tenant_id = db.Column(StringUUID, nullable=False)
     provider_name = db.Column(db.String(255), nullable=False)
     preferred_provider_type = db.Column(db.String(40), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
-    updated_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
-
-
-class ProviderOrder(Base):
-    __tablename__ = "provider_orders"
-    __table_args__ = (
-        db.PrimaryKeyConstraint("id", name="provider_order_pkey"),
-        db.Index("provider_order_tenant_provider_idx", "tenant_id", "provider_name"),
-    )
-
-    id = db.Column(StringUUID, server_default=db.text("uuid_generate_v4()"))
-    tenant_id = db.Column(StringUUID, nullable=False)
-    provider_name = db.Column(db.String(255), nullable=False)
-    account_id = db.Column(StringUUID, nullable=False)
-    payment_product_id = db.Column(db.String(191), nullable=False)
-    payment_id = db.Column(db.String(191))
-    transaction_id = db.Column(db.String(191))
-    quantity = db.Column(db.Integer, nullable=False, server_default=db.text("1"))
-    currency = db.Column(db.String(40))
-    total_amount = db.Column(db.Integer)
-    payment_status = db.Column(db.String(40), nullable=False, server_default=db.text("'wait_pay'::character varying"))
-    paid_at = db.Column(db.DateTime)
-    pay_failed_at = db.Column(db.DateTime)
-    refunded_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
     updated_at = db.Column(db.DateTime, nullable=False, server_default=func.current_timestamp())
 

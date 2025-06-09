@@ -4,8 +4,8 @@ from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, Settings
 
 from .deploy import DeploymentConfig
 from .feature import FeatureConfig
-from .packaging import PackagingInfo
 from .middleware import MiddlewareConfig
+from .packaging import PackagingInfo
 
 logger = logging.getLogger(__name__)
 

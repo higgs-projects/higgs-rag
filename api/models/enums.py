@@ -9,15 +9,3 @@ class CreatorUserRole(StrEnum):
 class UserFrom(StrEnum):
     ACCOUNT = "account"
     END_USER = "end-user"
-
-
-class WorkflowRunTriggeredFrom(StrEnum):
-    DEBUGGING = "debugging"
-    APP_RUN = "app-run"
-
-
-class DraftVariableType(StrEnum):
-    # node means that the correspond variable
-    NODE = "node"
-    SYS = "sys"
-    CONVERSATION = "conversation"

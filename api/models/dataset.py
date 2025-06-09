@@ -574,23 +574,6 @@ class ChildChunk(Base):
         return db.session.query(DocumentSegment).filter(DocumentSegment.id == self.segment_id).first()
 
 
-class DatasetQuery(Base):
-    __tablename__ = "dataset_queries"
-    __table_args__ = (
-        db.PrimaryKeyConstraint("id", name="dataset_query_pkey"),
-        db.Index("dataset_query_dataset_id_idx", "dataset_id"),
-    )
-
-    id = db.Column(StringUUID, primary_key=True, nullable=False, server_default=db.text("uuid_generate_v4()"))
-    dataset_id = db.Column(StringUUID, nullable=False)
-    content = db.Column(db.Text, nullable=False)
-    source = db.Column(db.String(255), nullable=False)
-    source_app_id = db.Column(StringUUID, nullable=True)
-    created_by_role = db.Column(db.String, nullable=False)
-    created_by = db.Column(StringUUID, nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.current_timestamp())
-
-
 class Embedding(Base):
     __tablename__ = "embeddings"
     __table_args__ = (
