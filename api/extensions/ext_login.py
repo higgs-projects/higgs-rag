@@ -21,13 +21,11 @@ def load_user_from_request(request_from_flask_login):
     auth_token: str | None = None
     if auth_header:
         if " " not in auth_header:
-            raise Unauthorized(
-                "Invalid Authorization header format. Expected 'Bearer <api-key>' format.")
+            raise Unauthorized("Invalid Authorization header format. Expected 'Bearer <api-key>' format.")
         auth_scheme, auth_token = auth_header.split(maxsplit=1)
         auth_scheme = auth_scheme.lower()
         if auth_scheme != "bearer":
-            raise Unauthorized(
-                "Invalid Authorization header format. Expected 'Bearer <api-key>' format.")
+            raise Unauthorized("Invalid Authorization header format. Expected 'Bearer <api-key>' format.")
     else:
         auth_token = request.args.get("_token")
 
@@ -46,8 +44,7 @@ def load_user_from_request(request_from_flask_login):
                 )
                 if tenant_account_join:
                     tenant, ta = tenant_account_join
-                    account = db.session.query(Account).filter_by(
-                        id=ta.account_id).first()
+                    account = db.session.query(Account).filter_by(id=ta.account_id).first()
                     if account:
                         account.current_tenant = tenant
                         return account

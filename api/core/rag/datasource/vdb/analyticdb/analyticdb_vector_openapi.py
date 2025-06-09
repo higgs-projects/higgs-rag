@@ -63,7 +63,6 @@ class AnalyticdbVectorOpenAPI:
         self._client_config = open_api_models.Config(user_agent="dify", **config.to_analyticdb_client_params())
         self._client = Client(self._client_config)
 
-
     def search_by_hybrid(self, query: str, query_vector: list[float], **kwargs: Any) -> list[Document]:
         from alibabacloud_gpdb20160503 import models as gpdb_20160503_models
 

@@ -26,7 +26,6 @@ from services.errors.index import IndexNotInitializedError
 
 class DatasetRetrievalApi(DatasetApiResource):
     def post(self, tenant_id):
-
         # 解析POST的数据
         parser = reqparse.RequestParser()
         parser.add_argument("knowledge_id", type=str, location="json")
@@ -34,7 +33,7 @@ class DatasetRetrievalApi(DatasetApiResource):
         parser.add_argument("retrieval_setting", type=dict, location="json")
         parser.add_argument("metadata_condition", type=dict, required=False, location="json")
         args = parser.parse_args()
-        
+
         # 校验与检查参数
         query = args["query"]
 
@@ -56,7 +55,7 @@ class DatasetRetrievalApi(DatasetApiResource):
                 metadata_condition=args["metadata_condition"],
             )
             return {"records": response}
-        
+
         except Forbidden as ex:
             raise Forbidden(ex)
         except IndexNotInitializedError:
@@ -79,7 +78,6 @@ class DatasetRetrievalApi(DatasetApiResource):
         except Exception as e:
             logging.exception("Dataset Retrieval failed.")
             raise InternalServerError(str(e))
-
 
 
 api.add_resource(DatasetRetrievalApi, "/datasets/retrieval")

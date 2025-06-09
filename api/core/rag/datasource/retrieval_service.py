@@ -169,8 +169,7 @@ class RetrievalService:
                     include_segment_ids.add(segment.id)
                     record = {
                         "segment": segment,
-                        # type: ignore
-                        "score": document.metadata.get("score"),
+                        "score": document.metadata.get("score"),  # type: ignore
                     }
                     records.append(record)
 

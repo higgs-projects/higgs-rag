@@ -26,7 +26,6 @@ class DatasetService:
         dataset: Optional[Dataset] = db.session.query(Dataset).filter_by(id=dataset_id).first()
         return dataset
 
-
     @classmethod
     def retrieve(
         cls,
@@ -42,29 +41,27 @@ class DatasetService:
             cls.check_dataset_permission(dataset, account)
         except NoPermissionError as e:
             raise Forbidden(str(e))
-    
+
         all_documents = RetrievalService.retrieve(
             dataset=dataset,
             query=query,
             top_k=retrieval_setting.get("top_k", 2),
             score_threshold=retrieval_setting.get("score_threshold", 0.0),
-            document_ids_filter=cls.get_document_id_filter(
-                dataset.id, metadata_condition),
+            document_ids_filter=cls.get_document_id_filter(dataset.id, metadata_condition),
         )
 
         end = time.perf_counter()
         logging.debug(f"Hit testing retrieve in {end - start:0.4f} seconds")
 
-        return cls.format_retrieve_response(query, all_documents)
+        return cls.format_retrieve_response(dataset, all_documents)
 
     @classmethod
-    def format_retrieve_response(cls, query: str, documents: list[Document]) -> list[dict[str, Any]]:
+    def format_retrieve_response(cls, dataset: Dataset, documents: list[Document]) -> list[dict[str, Any]]:
         retrieval_resource_list = []
         records = RetrievalService.format_retrieval_documents(documents)
         if records:
             for record in records:
                 segment = record.segment
-                dataset = db.session.query(Dataset).filter_by(id=segment.dataset_id).first()  # type: ignore
                 database_document = (
                     db.session.query(DatabaseDocument)
                     .filter(
@@ -102,8 +99,7 @@ class DatasetService:
         if retrieval_resource_list:
             retrieval_resource_list = sorted(
                 retrieval_resource_list,
-                key=lambda x: x["score"] if x.get(
-                    "score") is not None else 0.0,
+                key=lambda x: x["score"] if x.get("score") is not None else 0.0,
                 reverse=True,
             )
             for position, item in enumerate(retrieval_resource_list, start=1):
@@ -126,8 +122,7 @@ class DatasetService:
         if metadata_condition:
             conditions = []
             if metadata_condition:
-                # type: ignore
-                for sequence, condition in enumerate(metadata_condition):
+                for sequence, condition in enumerate(metadata_condition):  # type: ignore
                     metadata_name = condition.name
                     expected_value = condition.value
                     conditions.append(
@@ -188,35 +183,26 @@ class DatasetService:
                 )
             case "=" | "is":
                 if isinstance(value, str):
-                    filters.append(
-                        Document.doc_metadata[metadata_name] == f'"{value}"')
+                    filters.append(Document.doc_metadata[metadata_name] == f'"{value}"')
                 else:
-                    filters.append(sqlalchemy_cast(
-                        Document.doc_metadata[metadata_name].astext, Float) == value)
+                    filters.append(sqlalchemy_cast(Document.doc_metadata[metadata_name].astext, Float) == value)
             case "is not" | "≠":
                 if isinstance(value, str):
-                    filters.append(
-                        Document.doc_metadata[metadata_name] != f'"{value}"')
+                    filters.append(Document.doc_metadata[metadata_name] != f'"{value}"')
                 else:
-                    filters.append(sqlalchemy_cast(
-                        Document.doc_metadata[metadata_name].astext, Float) != value)
+                    filters.append(sqlalchemy_cast(Document.doc_metadata[metadata_name].astext, Float) != value)
             case "empty":
                 filters.append(Document.doc_metadata[metadata_name].is_(None))
             case "not empty":
-                filters.append(
-                    Document.doc_metadata[metadata_name].isnot(None))
+                filters.append(Document.doc_metadata[metadata_name].isnot(None))
             case "before" | "<":
-                filters.append(sqlalchemy_cast(
-                    Document.doc_metadata[metadata_name].astext, Float) < value)
+                filters.append(sqlalchemy_cast(Document.doc_metadata[metadata_name].astext, Float) < value)
             case "after" | ">":
-                filters.append(sqlalchemy_cast(
-                    Document.doc_metadata[metadata_name].astext, Float) > value)
+                filters.append(sqlalchemy_cast(Document.doc_metadata[metadata_name].astext, Float) > value)
             case "≤" | "<=":
-                filters.append(sqlalchemy_cast(
-                    Document.doc_metadata[metadata_name].astext, Float) <= value)
+                filters.append(sqlalchemy_cast(Document.doc_metadata[metadata_name].astext, Float) <= value)
             case "≥" | ">=":
-                filters.append(sqlalchemy_cast(
-                    Document.doc_metadata[metadata_name].astext, Float) >= value)
+                filters.append(sqlalchemy_cast(Document.doc_metadata[metadata_name].astext, Float) >= value)
             case _:
                 pass
         return filters

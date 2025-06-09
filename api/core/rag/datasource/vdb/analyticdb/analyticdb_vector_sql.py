@@ -1,5 +1,4 @@
 import json
-import uuid
 from contextlib import contextmanager
 from typing import Any
 
@@ -104,4 +103,3 @@ class AnalyticdbVectorBySql:
                     )
                     documents.append(doc)
         return documents
-

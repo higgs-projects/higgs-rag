@@ -32,8 +32,7 @@ def create_app() -> DifyApp:
     initialize_extensions(app)
     end_time = time.perf_counter()
     if dify_config.DEBUG:
-        logging.info(
-            f"Finished create_app ({round((end_time - start_time) * 1000, 2)} ms)")
+        logging.info(f"Finished create_app ({round((end_time - start_time) * 1000, 2)} ms)")
     return app
 
 
@@ -79,5 +78,4 @@ def initialize_extensions(app: DifyApp):
         ext.init_app(app)
         end_time = time.perf_counter()
         if dify_config.DEBUG:
-            logging.info(
-                f"Loaded {short_name} ({round((end_time - start_time) * 1000, 2)} ms)")
+            logging.info(f"Loaded {short_name} ({round((end_time - start_time) * 1000, 2)} ms)")

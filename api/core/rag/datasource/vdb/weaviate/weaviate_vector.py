@@ -1,4 +1,3 @@
-import datetime
 import json
 from typing import Any, Optional
 
@@ -7,13 +6,11 @@ import weaviate  # type: ignore
 from pydantic import BaseModel, model_validator
 
 from configs import dify_config
-from core.rag.datasource.vdb.field import Field
 from core.rag.datasource.vdb.vector_base import BaseVector
 from core.rag.datasource.vdb.vector_factory import AbstractVectorFactory
 from core.rag.datasource.vdb.vector_type import VectorType
 from core.rag.embedding.embedding_base import Embeddings
 from core.rag.models.document import Document
-from extensions.ext_redis import redis_client
 from models.dataset import Dataset
 
 
@@ -62,7 +59,6 @@ class WeaviateVector(BaseVector):
 
     def get_type(self) -> str:
         return VectorType.WEAVIATE
-
 
     def search_by_hybrid(self, query: str, query_vector: list[float], **kwargs: Any) -> list[Document]:
         # TODO 实现
