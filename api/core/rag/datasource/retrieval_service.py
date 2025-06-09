@@ -16,7 +16,7 @@ class RetrievalService:
     @classmethod
     def retrieve(
         cls,
-        dataset_id: str,
+        dataset: Dataset,
         query: str,
         top_k: int,
         score_threshold: Optional[float] = 0.0,
@@ -25,7 +25,6 @@ class RetrievalService:
         if not query:
             return []
 
-        dataset = cls._get_dataset(dataset_id)
         if not dataset:
             return []
 
@@ -47,10 +46,6 @@ class RetrievalService:
             raise ValueError(";\n".join(exceptions))
 
         return all_documents
-
-    @classmethod
-    def _get_dataset(cls, dataset_id: str) -> Optional[Dataset]:
-        return db.session.query(Dataset).filter(Dataset.id == dataset_id).first()
 
     @staticmethod
     def escape_query_for_search(query: str) -> str:

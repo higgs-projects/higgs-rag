@@ -6,4 +6,4 @@ bp = Blueprint("service_api", __name__, url_prefix="/v1")
 api = ExternalApi(bp)
 
 from . import index
-from .dataset import hit_testing
+from .dataset import retrieval
