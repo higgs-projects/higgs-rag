@@ -35,31 +35,8 @@ class AnalyticdbVector(BaseVector):
     def get_type(self) -> str:
         return VectorType.ANALYTICDB
 
-    def create(self, texts: list[Document], embeddings: list[list[float]], **kwargs):
-        dimension = len(embeddings[0])
-        self.analyticdb_vector._create_collection_if_not_exists(dimension)
-        self.analyticdb_vector.add_texts(texts, embeddings)
-
-    def add_texts(self, documents: list[Document], embeddings: list[list[float]], **kwargs):
-        self.analyticdb_vector.add_texts(documents, embeddings)
-
-    def text_exists(self, id: str) -> bool:
-        return self.analyticdb_vector.text_exists(id)
-
-    def delete_by_ids(self, ids: list[str]) -> None:
-        self.analyticdb_vector.delete_by_ids(ids)
-
-    def delete_by_metadata_field(self, key: str, value: str) -> None:
-        self.analyticdb_vector.delete_by_metadata_field(key, value)
-
-    def search_by_vector(self, query_vector: list[float], **kwargs: Any) -> list[Document]:
-        return self.analyticdb_vector.search_by_vector(query_vector, **kwargs)
-
-    def search_by_full_text(self, query: str, **kwargs: Any) -> list[Document]:
-        return self.analyticdb_vector.search_by_full_text(query, **kwargs)
-
-    def delete(self) -> None:
-        self.analyticdb_vector.delete()
+    def search_by_hybrid(self, query: str, query_vector: list[float], **kwargs: Any) -> list[Document]:
+        return self.analyticdb_vector.search_by_hybrid(query, query_vector, **kwargs)
 
 
 class AnalyticdbVectorFactory(AbstractVectorFactory):
