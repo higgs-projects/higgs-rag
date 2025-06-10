@@ -4,36 +4,27 @@ from typing import Any, Optional
 
 from sqlalchemy import Float, and_, or_, text
 from sqlalchemy import cast as sqlalchemy_cast
-from sqlalchemy.orm import load_only
-from werkzeug.exceptions import Forbidden
+from werkzeug.exceptions import Forbidden, NotFound
 
 from core.rag.datasource.retrieval_service import RetrievalService
 from core.rag.entities.metadata_entities import Condition
-from core.rag.index_processor.constant.index_type import IndexType
 from core.rag.models.document import Document
 from extensions.ext_database import db
 from models.account import TenantAccountRole
 from models.dataset import (
-    ChildChunk,
     Dataset,
     DatasetPermission,
     DatasetPermissionEnum,
-    DocumentSegment,
 )
-from models.dataset import Document as DatabaseDocument
 from services.errors.account import NoPermissionError
 
 
 class DatasetService:
-    @staticmethod
-    def get_dataset(dataset_id) -> Optional[Dataset]:
-        dataset: Optional[Dataset] = db.session.query(Dataset).filter_by(id=dataset_id).first()
-        return dataset
 
     @classmethod
     def retrieve(
         cls,
-        dataset: Dataset,
+        dataset_id: str,
         account: str,
         query: str,
         retrieval_setting: dict,  # FIXME drop this any
@@ -41,6 +32,10 @@ class DatasetService:
     ) -> list[dict[str, Any]]:
         start = time.perf_counter()
 
+        dataset = cls.get_dataset(dataset_id)
+        if dataset is None:
+            raise NotFound("Dataset not found.")
+    
         try:
             cls.check_dataset_permission(dataset, account)
         except NoPermissionError as e:
@@ -59,6 +54,11 @@ class DatasetService:
 
         return cls.format_retrieve_response(dataset, all_documents)
    
+    @classmethod
+    def get_dataset(cls, dataset_id) -> Optional[Dataset]:
+        dataset: Optional[Dataset] = db.session.query(Dataset).filter_by(id=dataset_id).first()
+        return dataset
+
 
     @classmethod
     def format_retrieve_response(cls, dataset: Dataset, documents: list[Document]) -> list[dict[str, Any]]:

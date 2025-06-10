@@ -42,13 +42,9 @@ class DatasetRetrievalApi(DatasetApiResource):
 
         dataset_id_str = str(args.get("knowledge_id"))
 
-        dataset = DatasetService.get_dataset(dataset_id_str)
-        if dataset is None:
-            raise NotFound("Dataset not found.")
-
         try:
             response = DatasetService.retrieve(
-                dataset=dataset,
+                dataset_id=dataset_id_str,
                 query=args["query"],
                 account=current_user,
                 retrieval_setting=args["retrieval_setting"],
@@ -58,6 +54,8 @@ class DatasetRetrievalApi(DatasetApiResource):
 
         except Forbidden as ex:
             raise Forbidden(ex)
+        except NotFound as ex:
+            raise NotFound(ex)
         except IndexNotInitializedError:
             raise DatasetNotInitializedError()
         except ProviderTokenNotInitError as ex:
