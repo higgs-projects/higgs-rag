@@ -68,8 +68,15 @@ class RetrievalService:
                 doc.id: doc
                 for doc in db.session.query(DatasetDocument)
                 .filter(DatasetDocument.id.in_(document_ids))
-                .options(load_only(DatasetDocument.id, DatasetDocument.doc_form, DatasetDocument.dataset_id))
-                .all()
+                .options(
+                    load_only(
+                        DatasetDocument.id, 
+                        DatasetDocument.name,
+                        DatasetDocument.doc_form,
+                        DatasetDocument.doc_metadata,
+                        DatasetDocument.data_source_type,
+                        DatasetDocument.dataset_id
+                )).all()
             }
 
             records = []
@@ -132,6 +139,7 @@ class RetrievalService:
                         }
                         segment_child_map[segment.id] = map_detail
                         record = {
+                            "document": dataset_document,
                             "segment": segment,
                         }
                         records.append(record)
@@ -168,6 +176,7 @@ class RetrievalService:
 
                     include_segment_ids.add(segment.id)
                     record = {
+                        "document": dataset_document,                        
                         "segment": segment,
                         "score": document.metadata.get("score"),  # type: ignore
                     }

@@ -4,17 +4,21 @@ from typing import Any, Optional
 
 from sqlalchemy import Float, and_, or_, text
 from sqlalchemy import cast as sqlalchemy_cast
+from sqlalchemy.orm import load_only
 from werkzeug.exceptions import Forbidden
 
 from core.rag.datasource.retrieval_service import RetrievalService
 from core.rag.entities.metadata_entities import Condition
+from core.rag.index_processor.constant.index_type import IndexType
 from core.rag.models.document import Document
 from extensions.ext_database import db
 from models.account import TenantAccountRole
 from models.dataset import (
+    ChildChunk,
     Dataset,
     DatasetPermission,
     DatasetPermissionEnum,
+    DocumentSegment,
 )
 from models.dataset import Document as DatabaseDocument
 from services.errors.account import NoPermissionError
@@ -51,9 +55,10 @@ class DatasetService:
         )
 
         end = time.perf_counter()
-        logging.debug(f"Hit testing retrieve in {end - start:0.4f} seconds")
+        logging.debug(f"Dataset retrieve in {end - start:0.4f} seconds")
 
         return cls.format_retrieve_response(dataset, all_documents)
+   
 
     @classmethod
     def format_retrieve_response(cls, dataset: Dataset, documents: list[Document]) -> list[dict[str, Any]]:
@@ -62,15 +67,7 @@ class DatasetService:
         if records:
             for record in records:
                 segment = record.segment
-                database_document = (
-                    db.session.query(DatabaseDocument)
-                    .filter(
-                        DatabaseDocument.id == segment.document_id,
-                        DatabaseDocument.enabled == True,
-                        DatabaseDocument.archived == False,
-                    )
-                    .first()
-                )
+                database_document = record.document
                 if dataset and database_document:
                     source = {
                         "metadata": {
