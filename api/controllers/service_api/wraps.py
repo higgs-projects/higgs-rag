@@ -84,19 +84,19 @@ def validate_and_get_api_token(scope: str | None = None):
     current_time = datetime.now(UTC).replace(tzinfo=None)
     cutoff_time = current_time - timedelta(minutes=1)
     with Session(db.engine, expire_on_commit=False) as session:
-        update_stmt = (
-            update(ApiToken)
-            .where(
-                ApiToken.token == auth_token,
-                (ApiToken.last_used_at.is_(None) | (ApiToken.last_used_at < cutoff_time)),
-                ApiToken.type == scope,
-            )
-            .values(last_used_at=current_time)
-            .returning(ApiToken)
-        )
-        result = session.execute(update_stmt)
-        api_token = result.scalar_one_or_none()
-
+        # update_stmt = (
+        #     update(ApiToken)
+        #     .where(
+        #         ApiToken.token == auth_token,
+        #         (ApiToken.last_used_at.is_(None) | (ApiToken.last_used_at < cutoff_time)),
+        #         ApiToken.type == scope,
+        #     )
+        #     .values(last_used_at=current_time)
+        #     .returning(ApiToken)
+        # )
+        # result = session.execute(update_stmt)
+        # api_token = result.scalar_one_or_none()
+        api_token = None
         if not api_token:
             stmt = select(ApiToken).where(ApiToken.token == auth_token, ApiToken.type == scope)
             api_token = session.scalar(stmt)
