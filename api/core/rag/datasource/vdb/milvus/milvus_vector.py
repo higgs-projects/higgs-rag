@@ -85,7 +85,7 @@ class MilvusVector(BaseVector):
 
         try:
             milvus_version = self._client.get_server_version()
-            return version.parse(milvus_version).base_version >= version.parse("2.5.0").base_version
+            return version.parse(milvus_version) >= version.parse("2.5.0")
         except Exception as e:
             logger.warning(f"Failed to check Milvus version: {str(e)}. Disabling hybrid search.")
             return False

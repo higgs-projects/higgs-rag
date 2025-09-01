@@ -9,7 +9,7 @@ class PackagingInfo(BaseSettings):
 
     CURRENT_VERSION: str = Field(
         description="Dify RAG version",
-        default="1.4.1",
+        default="1.8.0",
     )
 
     COMMIT_SHA: str = Field(
